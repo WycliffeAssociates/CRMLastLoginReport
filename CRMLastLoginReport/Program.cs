@@ -84,7 +84,6 @@ namespace CRMLastLoginReport
                 Environment.Exit(3);
             }
             Console.WriteLine("All done");
-            Console.ReadLine();
         }
     }
 }
