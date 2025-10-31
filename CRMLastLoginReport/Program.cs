@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xrm.Tooling.Connector;
+using Microsoft.PowerPlatform.Dataverse.Client;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using System.IO;
+using CommandLine;
 
 namespace CRMLastLoginReport
 {
@@ -15,18 +16,20 @@ namespace CRMLastLoginReport
         static void Main(string[] args)
         {
             // Extract the command line args
-            CommandLineArgs options = new CommandLineArgs();
-            if (!CommandLine.Parser.Default.ParseArguments(args, options))
-            {
-                Environment.Exit(1);
-            }
+            var result = CommandLine.Parser.Default.ParseArguments<CommandLineArgs>(args);
+            
+            result.WithParsed(options => RunWithOptions(options))
+                  .WithNotParsed(errors => Environment.Exit(1));
+        }
 
+        static void RunWithOptions(CommandLineArgs options)
+        {
             // Log into CRM
             Console.WriteLine("Logging in");
-            CrmServiceClient service = new CrmServiceClient(options.ConnectionString);
-            if (!string.IsNullOrEmpty(service.LastCrmError))
+            ServiceClient service = new ServiceClient(options.ConnectionString);
+            if (!service.IsReady)
             {
-                Console.WriteLine($"Unable to connect to crm {service.LastCrmError}");
+                Console.WriteLine($"Unable to connect to crm {service.LastError}");
                 Environment.Exit(2);
             }
 
@@ -81,7 +84,6 @@ namespace CRMLastLoginReport
                 Environment.Exit(3);
             }
             Console.WriteLine("All done");
-            Console.ReadLine();
         }
     }
 }
